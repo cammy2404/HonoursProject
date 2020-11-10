@@ -905,6 +905,7 @@ namespace Microsoft.MixedReality.Toolkit.Boundary
         /// </summary>
         private void CalculateBoundaryBounds()
         {
+            return; /*
             // Reset the bounds
             Bounds = System.Array.Empty<Edge>();
             FloorHeight = null;
@@ -939,6 +940,7 @@ namespace Microsoft.MixedReality.Toolkit.Boundary
             {
                 Debug.LogWarning("Failed to calculate boundary bounds.");
             }
+            */
         }
 
         /// <summary>

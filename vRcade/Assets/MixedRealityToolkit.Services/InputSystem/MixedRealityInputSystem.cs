@@ -307,8 +307,8 @@ namespace Microsoft.MixedReality.Toolkit.Input
             {
                 if (Application.isPlaying)
                 {
-                    GazeProvider.GazePointer.BaseCursor.Destroy();
-                    UnityEngine.Object.Destroy(GazeProvider as Component);
+                    //GazeProvider.GazePointer.BaseCursor.Destroy();
+                    //UnityEngine.Object.Destroy(GazeProvider as Component);
                 }
                 else
                 {

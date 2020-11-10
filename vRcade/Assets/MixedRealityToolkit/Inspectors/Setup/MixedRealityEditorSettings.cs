@@ -105,7 +105,7 @@ namespace Microsoft.MixedReality.Toolkit.Utilities.Editor
                 if (!MixedRealityOptimizeUtils.IsWMRDepthBufferFormat16bit())
                 {
                     // If depth format is 24-bit, advise to consider 16-bit for performance.
-                    Debug.LogWarning("<b>Depth Buffer Sharing</b> has 24-bit depth format selected. Consider using 16-bit for performance. See <i>Mixed Reality Toolkit</i> > <i>Utilities</i> > <i>Optimize Window</i> tool for more information to improve performance");
+                    //Debug.LogWarning("<b>Depth Buffer Sharing</b> has 24-bit depth format selected. Consider using 16-bit for performance. See <i>Mixed Reality Toolkit</i> > <i>Utilities</i> > <i>Optimize Window</i> tool for more information to improve performance");
                 }
 
                 if (!AudioSettings.GetSpatializerPluginName().Equals(MSFT_AudioSpatializerPlugin))
