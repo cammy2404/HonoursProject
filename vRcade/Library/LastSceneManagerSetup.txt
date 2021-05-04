@@ -1,5 +1,5 @@
 sceneSetups:
-- path: Assets/Scenes/StackEm.unity
+- path: Assets/Scenes/Cinematic/BeachBatAndBall - Cinematic.unity
   isLoaded: 1
   isActive: 1
   isSubScene: 0

@@ -225,6 +225,7 @@ GameObject:
   - component: {fileID: 9128726433050214161}
   - component: {fileID: 6382712905537619329}
   - component: {fileID: -4143401221110375898}
+  - component: {fileID: 8621004840146463053}
   m_Layer: 0
   m_Name: LeftHand
   m_TagString: LeftHand
@@ -313,6 +314,25 @@ MonoBehaviour:
   GrabbableParentTag: GrabbableParent
   multiplier: 10
   handMode: 0
+--- !u!95 &8621004840146463053
+Animator:
+  serializedVersion: 3
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1875636794071725463}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 355a6392f02cd204d976f890028d709f, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorControllerStateOnDisable: 0
 --- !u!1 &2088137360730091278
 GameObject:
   m_ObjectHideFlags: 0

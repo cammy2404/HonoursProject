@@ -10,7 +10,7 @@ public class LeftHandControl : MonoBehaviour
     GameObject grabbedObject = null;
 
     Vector3 offset;
-    float angleBetween = 0.0f;
+    //float angleBetween = 0.0f;
 
     float itemWeight;
 

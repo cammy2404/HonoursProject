@@ -8,69 +8,110 @@ public class CannonControl : MonoBehaviour
     public Transform cannonVerticalRotationPoint;
     public Transform cannonHorizontalRotationPoint;
     public float dampening = 250;
-    public float rotationSpeed = 25;
-    public float upCap = 0;
-    public float downCap = 0;
-    public float leftCap = 0;
-    public float rightCap = 0;
-
-    [Header("Cannon Ball")]
-    public GameObject cannonBallPrefab;
-    public Transform cannonFront;
-    public Transform cannonRear;
-    public float force;
+    public float rotationSpeed = 2.5f;
+    public float upcap = 10;
+    public float downcap = -10;
+    public float leftcap = -10;
+    public float rightcap = 10;
 
     float desiredVertRot;
     float desiredHorRot;
 
+    [Header("Cannon Ball")]
+    public GameObject[] cannonBallPrefab;
+    public Transform cannonFront;
+    public Transform cannonRear;
+    public float force;
+
+    int projectileIndex = 0;
+
+    BluetoothConnection blueC;
+    int joystickMax = 1024;
+    int joystickNewRange = 10;
+
+    bool butt1Curr = false;
+    bool butt1Prev = false;
+
+    bool butt2Curr = false;
+    bool butt2Prev = false;
+
+    bool butt3Curr = false;
+    bool butt3Prev = false;
+
+    float pan;
+    float pitch;
+
+    float currPan = 0;
+    float currPitch = 0;
+
     void Start()
     {
-        
+        blueC = GameObject.FindGameObjectWithTag("GameController").GetComponent<BluetoothConnection>();
     }
 
-    
     void Update()
     {
-        if (Input.GetKey(KeyCode.U))
+        if (blueC.CheckActive())
         {
-            desiredVertRot += rotationSpeed * Time.deltaTime;
-            if (desiredVertRot > upCap) desiredVertRot = upCap;
-        }
+            Buttons();
 
-        if (Input.GetKey(KeyCode.J))
+            pan = Map(blueC.joyLeftX, 0, joystickMax, -joystickNewRange, joystickNewRange);
+            pitch = Map(blueC.joyLeftY, 0, joystickMax, -joystickNewRange, joystickNewRange);
+
+            RotateCannon(pan, pitch);
+        }
+    }
+
+
+    void Buttons()
+    {
+        // Ensures that the function is only called once, even if the button is held down
+
+        butt1Curr = blueC.butLeft;
+        if (butt1Curr && (butt1Curr != butt1Prev))
         {
-            desiredVertRot -= rotationSpeed * Time.deltaTime;
-            if (desiredVertRot < downCap) desiredVertRot = downCap;
+            IncreaseProjectileIndex(1);
         }
+        butt1Prev = butt1Curr;
 
-        if (Input.GetKey(KeyCode.H))
+        butt2Curr = blueC.butRight;
+        if (butt2Curr && (butt2Curr != butt2Prev))
         {
-            desiredHorRot -= rotationSpeed * Time.deltaTime;
-            if (desiredHorRot < leftCap) desiredHorRot = leftCap;
+            IncreaseProjectileIndex(-1);
         }
+        butt2Prev = butt2Curr;
 
-        if (Input.GetKey(KeyCode.K))
-        {
-            desiredHorRot += rotationSpeed * Time.deltaTime;
-            if (desiredHorRot > rightCap) desiredHorRot = rightCap;
-        }
-
-        if (Input.GetKeyDown(KeyCode.Y))
+        butt3Curr = blueC.butMid;
+        if (butt3Curr && (butt3Curr != butt3Prev))
         {
             CreateCannonBall();
         }
+        butt3Prev = butt3Curr;
+
+    }
+
+    void RotateCannon(float panValue, float pitchValue)
+    {
+        desiredHorRot += panValue * rotationSpeed * Time.deltaTime;
+        if (desiredHorRot < leftcap) desiredHorRot = leftcap;
+        if (desiredHorRot > rightcap) desiredHorRot = rightcap;
+
+        desiredVertRot += pitchValue * rotationSpeed * Time.deltaTime;
+        if (desiredVertRot < downcap) desiredVertRot = downcap;
+        if (desiredVertRot > upcap) desiredVertRot = upcap;
 
 
         Quaternion desiredVertRotQ = Quaternion.Euler(desiredVertRot, cannonVerticalRotationPoint.eulerAngles.y, cannonVerticalRotationPoint.eulerAngles.z);
         cannonVerticalRotationPoint.rotation = Quaternion.Lerp(transform.rotation, desiredVertRotQ, Time.deltaTime * dampening);
-        
+
         Quaternion desiredHorRotQ = Quaternion.Euler(cannonHorizontalRotationPoint.eulerAngles.x, desiredHorRot, cannonHorizontalRotationPoint.eulerAngles.z);
         cannonHorizontalRotationPoint.rotation = Quaternion.Lerp(transform.rotation, desiredHorRotQ, Time.deltaTime * dampening);
     }
 
+
     void CreateCannonBall()
     {
-        GameObject go = Instantiate(cannonBallPrefab);
+        GameObject go = Instantiate(cannonBallPrefab[projectileIndex]);
         go.transform.position = cannonFront.position;
 
         Vector3 throwVector = cannonFront.position - cannonRear.position;
@@ -79,4 +120,27 @@ public class CannonControl : MonoBehaviour
         rb.AddForce(force * throwVector, ForceMode.Impulse);
     }
 
+    void IncreaseProjectileIndex(int inc)
+    {
+        projectileIndex = (projectileIndex + 1) % cannonBallPrefab.Length;
+        Debug.Log(projectileIndex);
+    }
+
+    float Map(int value, int min, int max, int newMin, int newMax, bool cap = true)
+    {
+        int range = max - min;
+
+        float percentage = (float)value / range;
+
+        if (cap && percentage > 1.0f)
+            percentage = 1.0f;
+
+        range = newMax - newMin;
+
+        float newValue = percentage * range;
+
+        newValue += newMin;
+
+        return newValue;
+    }
 }
