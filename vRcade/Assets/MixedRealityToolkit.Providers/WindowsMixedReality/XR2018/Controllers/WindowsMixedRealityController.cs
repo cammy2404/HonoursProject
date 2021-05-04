@@ -281,7 +281,7 @@ namespace Microsoft.MixedReality.Toolkit.WindowsMixedReality.Input
 
         private async void CreateControllerModelFromPlatformSDK(InteractionSource interactionSource)
         {
-            Debug.Log("Trying to load controller model from platform SDK");
+            //Debug.Log("Trying to load controller model from platform SDK");
             byte[] fileBytes = null;
 
 #if WINDOWS_UWP
@@ -343,7 +343,7 @@ namespace Microsoft.MixedReality.Toolkit.WindowsMixedReality.Input
             failedToObtainControllerModel = (gltfGameObject == null);
             if (failedToObtainControllerModel)
             {
-                Debug.LogWarning("Failed to create controller model from driver, defaulting to BaseController behavior");
+                //Debug.LogWarning("Failed to create controller model from driver, defaulting to BaseController behavior");
                 TryRenderControllerModel(GetType(), InputSourceType.Controller);
             }
         }
