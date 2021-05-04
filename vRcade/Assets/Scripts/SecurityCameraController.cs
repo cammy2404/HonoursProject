@@ -9,36 +9,36 @@ public class SecurityCameraController : MonoBehaviour
     public GameObject[] Cameras;
     private Transform[] CameraParents;
 
+    [Tooltip("The index of the camera array to start at.")]
     public int startingCamera = 0;
 
-    public float cameraPanSpeed = 0.5f;
-    public float cameraTiltSpeed = 0.5f;
-    public float cameraZoomSpeed = 1f;
+    [Range(0, 1)]
+    public float cameraPanSpeed = 0.1f;
+    [Range(0, 1)]
+    public float cameraPitchSpeed = 0.1f;
+    [Range(0, 1)]
+    public float cameraZoomSpeed = 0.1f;
 
-    private int currentCamera = 0;
+    private int currentCamera;
 
-    SerialPort stream;
-    public string comPort = "COM3";
-    public int baudRate = 9600;
-    
-    string input;
 
-    bool isOpen = false;
+    BluetoothConnection blueC;
+    int joystickMax = 1024;
+    int joystickNewRange = 10;
+
+    bool currChange = false;
+    bool prevChange = false;
+
+    float pan;
+    float pitch;
+
+    int zoomMin = 10;
+    int zoomMax = 100;
+    float zoom;
 
 
     void Start()
     {
-        stream = new SerialPort(comPort, baudRate);
-        stream.ReadTimeout = 50;
-        try
-        {
-            stream.Open();
-            isOpen = true;
-        }
-        catch (Exception)
-        {
-            Debug.LogWarning(comPort + " is not open/available");
-        }
 
         CameraParents = new Transform[Cameras.Length];
         for (int i = 0; i < CameraParents.Length; i++)
@@ -46,64 +46,39 @@ public class SecurityCameraController : MonoBehaviour
             CameraParents[i] = Cameras[i].transform.parent.parent.parent.transform;
         }
 
+        blueC = gameObject.GetComponent<BluetoothConnection>();
+
         changeCamera(true);
+
+        currentCamera = 0;
     }
 
 
     void Update()
     {
-        if (isOpen)
-            try
+        if (blueC.CheckActive())
+        {
+            // Change Camera
+            currChange = blueC.butTop;
+            // Ensures that the function is only called once, even if the button is held down
+            if (currChange && (currChange != prevChange))
             {
-                if (stream.BytesToRead > 0)
-                {
-                    input = stream.ReadLine().ToString().Trim();
-
-                    string[] inputSplit = input.Split('-');
-
-                    foreach (string s in inputSplit)
-                    {
-
-                        int i = int.Parse(s.Substring(0, 1).ToString().Trim());
-                        float v = float.Parse(s.Substring(1, s.Length - 1).ToString().Trim());
-
-                        switch (i)
-                        {
-                            case 1:
-                                if (v == 1)
-                                    changeCamera();
-                                break;
-
-                            case 2:
-                                TiltCamera(v);
-                                break;
-
-                            case 3:
-                                PanCamera(v);
-                                break;
-
-                            case 4:
-                                ajustZoomLevel(v);
-                                break;
-
-                            case 5:
-                                ajustZoomLevel(v);
-                                break;
-
-                            default:
-                                Debug.LogError("Value passed is not recognised");
-                                break;
-                        }
-
-                    }
-
-                    stream.DiscardInBuffer();
-                }
+                changeCamera();
             }
-            catch (Exception e)
-            {
-                Debug.LogWarning(e);
-            }
+            prevChange = currChange;
+
+            // Pan Camera
+            pan = Map(blueC.joyTopRightX, 0, joystickMax, -joystickNewRange, joystickNewRange);
+            PanCamera(pan);
+
+            // Pitch Camera
+            pitch = Map(blueC.joyTopRightY, 0, joystickMax, -joystickNewRange, joystickNewRange);
+            PitchCamera(-pitch);
+
+            // Change Camera Zoom
+            zoom = Map(blueC.joyTopLeftY, 0, joystickMax, -joystickNewRange, joystickNewRange);
+            ajustZoomLevel(zoom);
+        }
     }
 
     void changeCamera(bool start = false)
@@ -122,27 +97,52 @@ public class SecurityCameraController : MonoBehaviour
     void ajustZoomLevel(float value)
     {
         Camera cam = Cameras[currentCamera].GetComponent<Camera>();
+        float zoom = cam.fieldOfView;
 
-        float zoomLevel = (value == 0) ? 0f : ((value == 1) ? -cameraZoomSpeed : cameraZoomSpeed);
+        zoom += -value * cameraZoomSpeed;
 
-        cam.fieldOfView += zoomLevel;
+        if (zoom > zoomMax)
+            zoom = zoomMax;
+
+        if (zoom < zoomMin)
+            zoom = zoomMin;
+
+        cam.fieldOfView = zoom;
     }
 
     void PanCamera(float value)
     {
         Transform camParent = CameraParents[currentCamera];
 
-        float angle = (value == 0) ? 0f : ((value == 1) ? cameraPanSpeed : -cameraPanSpeed);
+        float angle = value * cameraPanSpeed;
 
-        camParent.RotateAround(camParent.position, camParent.up, angle);
+        camParent.RotateAround(camParent.position, Vector3.up, angle);
     }
 
-    void TiltCamera(float value)
+    void PitchCamera(float value)
     {
         Transform camParent = CameraParents[currentCamera];
 
-        float angle = (value == 0) ? 0f : ((value == 1) ? cameraTiltSpeed : -cameraTiltSpeed);
+        float angle = value * cameraPitchSpeed;
 
         camParent.RotateAround(camParent.position, camParent.right, angle);
+    }
+
+    float Map(int value, int min, int max, int newMin, int newMax, bool cap = true)
+    {
+        int range = max - min;
+
+        float percentage = (float)value / range;
+
+        if (cap && percentage > 1.0f)
+            percentage = 1.0f;
+
+        range = newMax - newMin;
+
+        float newValue = percentage * range;
+
+        newValue += newMin;
+
+        return newValue;
     }
 }

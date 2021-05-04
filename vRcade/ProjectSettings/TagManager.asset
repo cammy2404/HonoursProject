@@ -8,6 +8,11 @@ TagManager:
   - RightHand
   - Grabbable
   - GrabbableParent
+  - GamePlanet
+  - GamePlanetParent
+  - BlockSelector
+  - BlockSelectorItem
+  - Cannon
   layers:
   - Default
   - TransparentFX
@@ -18,7 +23,7 @@ TagManager:
   - 
   - 
   - VRInvisible
-  - 
+  - SecondInvisible
   - 
   - 
   - 

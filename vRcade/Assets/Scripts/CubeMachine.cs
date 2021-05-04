@@ -5,8 +5,15 @@ using UnityEngine;
 public class CubeMachine : MonoBehaviour
 {
     public GameObject linkedButton;
-    public GameObject prefab;
+    
+    //public GameObject prefab;
+
+    public bool isAbsolutePosition;
+    public Vector3 absolutePosition;
+
     public float yOffset = 0.25f;
+
+    public bool isGrabbable;
 
     Button button;
     bool butPressedDown = false;
@@ -20,19 +27,27 @@ public class CubeMachine : MonoBehaviour
     {
         if (button.pressed && !butPressedDown)
         {
+            GameObject prefab = GameObject.FindWithTag("BlockSelector").GetComponent<BlockControl>().currentBlock;
             butPressedDown = true;
 
-            Vector3 thisHeight = transform.localScale;
-            Vector3 prefabHeight = prefab.transform.localScale / 2;
+            Vector3 newPos;
 
-            float spawnHeight = thisHeight.y + prefabHeight.y + yOffset;
+            if (isAbsolutePosition)
+                newPos = absolutePosition;
+            else
+            {
+                Vector3 thisHeight = transform.localScale;
+                Vector3 prefabHeight = prefab.transform.localScale / 2;
 
-            Vector3 newPos = new Vector3(transform.position.x, spawnHeight, transform.position.z);
+                float spawnHeight = thisHeight.y + prefabHeight.y + yOffset;
 
+                newPos = new Vector3(transform.position.x, spawnHeight, transform.position.z);
+            }
             //Debug.Log("thisHeight - " + thisHeight + "  ::  prefabHeight - " + prefabHeight + "  ::  spawnHeight - " + spawnHeight + "  ::  newPos - " + newPos);
 
             GameObject obj = Instantiate(prefab, newPos, Quaternion.Euler(0, 0, 0));
-            obj.transform.parent = GameObject.FindGameObjectWithTag("GrabbableParent").transform;
+            if (isGrabbable)
+                obj.transform.parent = GameObject.FindGameObjectWithTag("GrabbableParent").transform;
         }
 
         if (!button.pressed && butPressedDown)

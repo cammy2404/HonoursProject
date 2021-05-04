@@ -51,6 +51,21 @@ public class HandGrab : MonoBehaviour
                 grippedObj.transform.parent = transform;
                 grippedObj.GetComponent<Rigidbody>().isKinematic = true;
                 currentGrabbedLocation = grippedObj.transform.position;
+
+                try
+                {
+                    GrabPoint gp = grippedObj.GetComponentInChildren<GrabPoint>();
+
+                    grippedObj.transform.localPosition = (handMode == 0) ? gp.grabPositionLeft : gp.grabPositionRight;
+                    grippedObj.transform.localRotation = Quaternion.Euler((handMode == 0) ? gp.grabRotationLeft : gp.grabRotationRight);
+
+                    gp.grabbed = true;
+
+                } catch (Exception e)
+                {
+                    // Item grabbed does not have a specific grab position
+                }
+
                 gripped = true;
             }
         }
@@ -65,18 +80,23 @@ public class HandGrab : MonoBehaviour
                 grippedObj.transform.parent = grippedParent.transform;
 
                 Rigidbody rb = grippedObj.GetComponent<Rigidbody>();
-                
 
                 rb.isKinematic = false;
                 
                 Vector3 throwVector = grippedObj.transform.position - currentGrabbedLocation;
-
+                //throwVector.Normalize();
 
                 rb.AddForce(throwVector * multiplier, ForceMode.Impulse);
 
                 currentGrabbedLocation = Vector3.zero;
                 //grippedObj = null;
                 gripped = false;
+
+                try
+                {
+                    grippedObj.GetComponentInChildren<GrabPoint>().grabbed = false;
+                }
+                catch {}
             }
         }
     }
@@ -88,7 +108,13 @@ public class HandGrab : MonoBehaviour
 
         if (other.gameObject.tag == GrabbableTag)
         {
+            //if (other.gameObject.GetComponent<GrabPoint>() != null)
+            //{
+            //    grippedObj = other.gameObject.transform.parent.gameObject;
+            //} else
+            
             grippedObj = other.gameObject;
+            
             //grippedMat = grippedObj.GetComponent<Renderer>().material;
             //grippedObj.GetComponent<Renderer>().material = CollisionColour;
         }

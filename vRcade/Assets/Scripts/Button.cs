@@ -6,6 +6,7 @@ public class Button : MonoBehaviour
 {
     public float endstop;
     public float pressedStop;
+    public bool oneTime = false;
 
     public bool pressed {
         get
@@ -17,6 +18,7 @@ public class Button : MonoBehaviour
     Transform button;
     Vector3 startPos;
     bool butPressed = false;
+    bool canPress = true;
 
     void Start()
     {
@@ -36,10 +38,17 @@ public class Button : MonoBehaviour
         if (button.position.y > startPos.y)
             button.position = new Vector3(button.position.x, startPos.y, button.position.z);
 
+        
         // Check if the button is pressed far enough down to consider it pressed
-        if (currOffset > pressedStop)
-            butPressed = true;
-        else
-            butPressed = false;
+        if (canPress)
+            if (currOffset > pressedStop)
+                butPressed = true;
+            else
+                butPressed = false;
+
+        if (butPressed && oneTime)
+        {
+            canPress = false;
+        }
     }
 }
